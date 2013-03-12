@@ -40,7 +40,7 @@ def dq_velocity_relaxation(solver,state,dt):
     return src
 
 
-def arz(use_petsc=False,kernel_language='Fortran',solver_type='sharpclaw',iplot=False,htmlplot=False,outdir='./_output',weno_order=5, disable_output=False,rp_type='hll'):
+def arz(use_petsc=False,solver_type='sharpclaw',iplot=False,htmlplot=False,outdir='./_output',weno_order=5,rp_type='fwave',IC='wiggles',num_cells=1000):
     """
     This example solves the 1-dimensional AW-Rascle traffic model.
     The conserved variables are:
@@ -74,7 +74,6 @@ def arz(use_petsc=False,kernel_language='Fortran',solver_type='sharpclaw',iplot=
         solver.dq_src=dq_velocity_relaxation
     else: raise Exception('Unrecognized value of solver_type.')
 
-    solver.kernel_language=kernel_language
     solver.num_waves=2
 
     if rp_type == 'fwave':
@@ -89,32 +88,37 @@ def arz(use_petsc=False,kernel_language='Fortran',solver_type='sharpclaw',iplot=
     solver.bc_lower[0] = pyclaw.BC.periodic
     solver.bc_upper[0] = pyclaw.BC.periodic
 
-    #========================================================================
-    # Instantiate the domain and set the boundary conditions
-    #========================================================================
-    x = pyclaw.Dimension('x',0.0,500.0,8000)
+    x = pyclaw.Dimension('x',0.0,500.0,num_cells)
     domain = pyclaw.Domain(x)
     num_eqn = 2
     state = pyclaw.State(domain,num_eqn)
+    claw = pyclaw.Controller()
 
     #========================================================================
     # Set the initial condition
     #========================================================================
     xc=domain.grid.x.centers
-    state.q[0,:] = 0.6 + 0.005*np.sin(2*np.pi*xc/500.) + 0.005*np.sin(24*np.pi*xc/500.)
-    state.q[1,:] = state.q[0,:]*hesitation(state.q[0,:]) # Zero velocity
+    if IC=='wiggles':
+        state.q[0,:] = 0.6 + 0.005*np.sin(2*np.pi*xc/500.) + 0.005*np.sin(24*np.pi*xc/500.)
+        state.q[1,:] = state.q[0,:]*hesitation(state.q[0,:]) # Zero velocity
+        claw.num_output_times = 1800
+        claw.tfinal = 600.
+    elif IC=='rp1':
+        state.q[0,:] = 0.9*(xc<250.)+0.1*(xc>250.)
+        state.q[1,:] = state.q[0,:]*(1.+hesitation(state.q[0,:]))
+        solver.dq_src=None
+        solver.bc_lower[0] = pyclaw.BC.extrap
+        solver.bc_upper[0] = pyclaw.BC.extrap
+        claw.num_output_times = 10
+        claw.tfinal = 1.
+
 
     #========================================================================
     # Set up the controller object
     #========================================================================
-    claw = pyclaw.Controller()
     claw.solution = pyclaw.Solution(state,domain)
     claw.solver = solver
     claw.outdir = outdir
-    claw.num_output_times = 1800
-    if disable_output:
-        claw.output_format = None
-    claw.tfinal = 600.
 
     # Solve
     status = claw.run()

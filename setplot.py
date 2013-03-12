@@ -26,7 +26,7 @@ def setplot(plotdata):
 
     # Set up for axes in this figure:
     plotaxes = plotfigure.new_plotaxes()
-#    plotaxes.axescmd = 'subplot(211)'
+    plotaxes.axescmd = 'subplot(211)'
     
     #plotaxes.xlimits = [0.,150.]
     plotaxes.ylimits = [-.2,1.0]
@@ -43,19 +43,19 @@ def setplot(plotdata):
 
 
     # Set up for axes in this figure:
-#    plotaxes = plotfigure.new_plotaxes()
-#    plotaxes.axescmd = 'subplot(212)'
-#    plotaxes.xlimits = 'auto'
-#    plotaxes.ylimits = 'auto'#[-.5,20.1]
-#    plotaxes.title = 'Velocity'
-#
-#    # Set up for item on these axes:
-#    plotitem = plotaxes.new_plotitem(plot_type='1d_plot')
-#    plotitem.plot_var = vel1
-#    plotitem.plotstyle = '-'
-#    plotitem.color = 'b'
-#    plotitem.show = True       # show on plot?
-#    plotitem.kwargs = {'linewidth':3,'markersize':5}
+    plotaxes = plotfigure.new_plotaxes()
+    plotaxes.axescmd = 'subplot(212)'
+    plotaxes.xlimits = 'auto'
+    plotaxes.ylimits = 'auto'#[-.5,20.1]
+    plotaxes.title = 'Velocity'
+
+    # Set up for item on these axes:
+    plotitem = plotaxes.new_plotitem(plot_type='1d_plot')
+    plotitem.plot_var = velocity
+    plotitem.plotstyle = '-'
+    plotitem.color = 'b'
+    plotitem.show = True       # show on plot?
+    plotitem.kwargs = {'linewidth':3,'markersize':5}
     
 
     # Parameters used only when creating html and/or latex hardcopy
