@@ -1,5 +1,5 @@
 !     --------------------------------------------
-    double precision function hesitation(rho)
+double precision function hesitation(rho)
 !     --------------------------------------------
     implicit none
 
@@ -8,10 +8,10 @@
     hesitation = 25*rho**0.2d0 / (1.d0-rho)**0.1d0
 
     return
-    END function
+end function
 
 !     --------------------------------------------
-    double precision function dhes(rho)
+double precision function dhes(rho)
 !     --------------------------------------------
     implicit none
 
@@ -20,12 +20,12 @@
     dhes = 5.d0*(2.d0-rho)/(2.d0*rho**0.8*(1.d0-rho)**1.1)
 
     return
-    END function
+end function
     
 
-
-    subroutine rp1(maxm,meqn,mwaves,mbc,mx,ql,qr,auxl,auxr, &
-               fwave,s,amdq,apdq,num_aux)
+! =====================================================
+subroutine rp1(maxm,meqn,mwaves,num_aux,mbc,mx,ql,qr,auxl,auxr, &
+               fwave,s,amdq,apdq)
 ! =====================================================
 
 ! This is an f-wave Riemann solver for the ARZ traffic model.
@@ -117,25 +117,24 @@
                 s(1,i) = (qim-qi + rhoi*hi - rhoim*him)/(rhoim-rhoi)
             endif
         endif
+    end do
 
 
-    END DO
-
-
-!     # compute the leftgoing and rightgoing fluctuations:
-!     # Note that here we assume s(1,i) < 0   and   s(2,i) > 0.
-    do 220 m=1,meqn
-        do 220 i = 2-mbc, mx+mbc
+    ! compute the leftgoing and rightgoing fluctuations:
+    ! Note that here we assume s(1,i) < 0   and   s(2,i) > 0.
+    do m=1,meqn
+        do i = 2-mbc, mx+mbc
             amdq(m,i) = 0.d0
             apdq(m,i) = 0.d0
-            do 90 mw=1,mwaves
+            do mw=1,mwaves
                 if (s(mw,i) < 0.d0) then
                     amdq(m,i) = amdq(m,i) + fwave(m,mw,i)
                 else
                     apdq(m,i) = apdq(m,i) + fwave(m,mw,i)
                 endif
-            90 END DO
-    220 END DO
+            end do
+        end do
+    end do
 
     return
     end subroutine rp1

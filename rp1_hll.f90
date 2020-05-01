@@ -1,6 +1,6 @@
-!     --------------------------------------------
-    double precision function hesitation(rho)
-!     --------------------------------------------
+! --------------------------------------------
+double precision function hesitation(rho)
+! --------------------------------------------
     implicit none
 
     double precision :: rho
@@ -8,11 +8,11 @@
     hesitation = 25*rho**0.2d0 / (1.d0-rho)**0.1d0
 
     return
-    END function
+end function
 
-!     --------------------------------------------
-    double precision function dhes(rho)
-!     --------------------------------------------
+! --------------------------------------------
+double precision function dhes(rho)
+! --------------------------------------------
     implicit none
 
     double precision :: rho
@@ -20,12 +20,13 @@
     dhes = 5.d0*(2.d0-rho)/(2.d0*rho**0.8*(1.d0-rho)**1.1)
 
     return
-    END function
+end function
     
 
 
-    subroutine rp1(maxm,meqn,mwaves,mbc,mx,ql,qr,auxl,auxr, &
-               wave,s,amdq,apdq,num_aux)
+! =====================================================
+subroutine rp1(maxm,meqn,mwaves,num_aux,mbc,mx,ql,qr,auxl,auxr, &
+               wave,s,amdq,apdq)
 ! =====================================================
 
 ! This is an HLL Riemann solver for the ARZ traffic model.
@@ -76,7 +77,7 @@
     double precision :: Q_hat_1, Q_hat_2, sl, sh, sr, rhoih, qih, hih, dhih
 
 
-!     # split the jump in f at each interface into waves
+! split the jump in f at each interface into waves
 
     do i = 2-mbc, mx+mbc
         rhoi  = ql(1,i)
@@ -136,22 +137,23 @@
         wave(2,2,i) = qi   - Q_hat_2
         !write(*,*) i, wave(2,2,i)
 
-    END DO
+    end do
 
 
     ! Check signs here?
-    do 220 m=1,meqn
-        do 220 i = 2-mbc, mx+mbc
+    do m=1,meqn
+        do i = 2-mbc, mx+mbc
             amdq(m,i) = 0.d0
             apdq(m,i) = 0.d0
-            do 90 mw=1,mwaves
+            do mw=1,mwaves
                 if (s(mw,i) < 0.d0) then
                     amdq(m,i) = amdq(m,i) + wave(m,mw,i)
                 else
                     apdq(m,i) = apdq(m,i) + wave(m,mw,i)
                 endif
-            90 END DO
-    220 END DO
+            end do
+        end do
+    end do
 
     return
-    end subroutine rp1
+end subroutine rp1

@@ -75,6 +75,7 @@ def arz(use_petsc=False,solver_type='sharpclaw',iplot=False,htmlplot=False,outdi
     else: raise Exception('Unrecognized value of solver_type.')
 
     solver.num_waves=2
+    solver.num_eqn=2
 
     if rp_type == 'fwave':
         import rp1_arz_traffic
@@ -88,7 +89,7 @@ def arz(use_petsc=False,solver_type='sharpclaw',iplot=False,htmlplot=False,outdi
     solver.bc_lower[0] = pyclaw.BC.periodic
     solver.bc_upper[0] = pyclaw.BC.periodic
 
-    x = pyclaw.Dimension('x',0.0,500.0,num_cells)
+    x = pyclaw.Dimension(0.0,500.0,num_cells)
     domain = pyclaw.Domain(x)
     num_eqn = 2
     state = pyclaw.State(domain,num_eqn)
@@ -101,16 +102,16 @@ def arz(use_petsc=False,solver_type='sharpclaw',iplot=False,htmlplot=False,outdi
     if IC=='wiggles':
         state.q[0,:] = 0.6 + 0.005*np.sin(2*np.pi*xc/500.) + 0.005*np.sin(24*np.pi*xc/500.)
         state.q[1,:] = state.q[0,:]*hesitation(state.q[0,:]) # Zero velocity
-        claw.num_output_times = 1800
         claw.tfinal = 600.
+        claw.num_output_times = 180
     elif IC=='rp1':
         state.q[0,:] = 0.9*(xc<250.)+0.1*(xc>250.)
         state.q[1,:] = state.q[0,:]*(1.+hesitation(state.q[0,:]))
         solver.dq_src=None
         solver.bc_lower[0] = pyclaw.BC.extrap
         solver.bc_upper[0] = pyclaw.BC.extrap
-        claw.num_output_times = 10
         claw.tfinal = 1.
+        claw.num_output_times = 10
 
 
     #========================================================================
@@ -119,9 +120,6 @@ def arz(use_petsc=False,solver_type='sharpclaw',iplot=False,htmlplot=False,outdi
     claw.solution = pyclaw.Solution(state,domain)
     claw.solver = solver
     claw.outdir = outdir
-
-    # Solve
-    status = claw.run()
 
     # Plot results
     if htmlplot:  pyclaw.plot.html_plot(outdir=outdir)
